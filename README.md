@@ -2,6 +2,9 @@
 
 Bem-vindo ao repositório do **Odonto Ferreira**, um sistema web desenvolvido para gerenciar as operações administrativas e clínicas de uma clínica odontológica. Este projeto inclui funcionalidades completas de CRUD (Cadastro, Exibição, Alteração e Exclusão) para **funcionários**, **pacientes**, **dentistas** e **cargos**.
 
+![TelaInicialOdontoFerreira](https://github.com/user-attachments/assets/7e5cc66c-5d7a-4df5-932f-527895cab6b2)
+
+
 ## 🚀 Funcionalidades
 
 - **Gerenciamento de Funcionários:**
