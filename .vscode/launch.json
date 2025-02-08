@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Iniciar o Programa",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\server.js"
+        },
+        {
+            "type": "node",
+            "name": "Executar Arquivo Atual",
+            "request": "launch",
+            "program": "${workspaceFolder}\\server.js"
+        }
+    ]
+}

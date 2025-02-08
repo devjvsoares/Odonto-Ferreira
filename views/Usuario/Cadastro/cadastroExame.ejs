@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="/js/exames/cadastrar.js"></script>
+    <title>Cadastrar Exame - Odonto Ferreira</title>
+    <script>
+        function validarDataConsulta(campo) {
+            const dataInserida = new Date(campo.value);
+            const hoje = new Date();
+            const doisMesesDepois = new Date(); 
+
+            doisMesesDepois.setMonth(hoje.getMonth() + 5);
+
+            hoje.setHours(0, 0, 0, 0);
+            doisMesesDepois.setHours(0, 0, 0, 0);
+            dataInserida.setHours(0, 0, 0, 0);
+
+            if (campo.value === "") {
+                campo.style.borderColor = "red";
+                alert("A data do exame não pode estar vazia.");
+                return false;
+            }
+
+            if (dataInserida < hoje) {
+                alert("A data do exame não pode ser anterior ao dia de hoje.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida > doisMesesDepois) {
+                alert("A data do exame não pode ser superior a 5 meses.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            campo.style.borderColor = "";
+            return true;
+}
+
+function mascaraCusto(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            let intValue = parseInt(value, 10) || 0; 
+            let formattedValue = (intValue / 100).toFixed(2); 
+            let parts = formattedValue.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            input.value = parts.join(',');
+        }
+
+
+        function validarHorario(campo) {
+        const valor = campo.value;
+
+        const horarioInicio = "08:00";
+        const horarioFim = "18:00";
+
+        if (valor < horarioInicio) {
+            alert("O horário não pode ser anterior a 08:00.");
+            campo.value = horarioInicio;
+        } else if (valor > horarioFim) {
+            alert("O horário não pode ser posterior a 18:00.");
+            campo.value = horarioFim;
+        }
+    }
+    </script>
+    <style>
+        /* Estilos semelhantes ao seu código anterior */
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            overflow: auto;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+        }
+
+        .background-interactive {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            bottom: -100px;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+
+            50% {
+                transform: translateY(-300px) translateX(50px);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .login-wrapper h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .login-wrapper img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1 1 calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+
+        .login-wrapper input,
+        .login-wrapper select {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .login-wrapper button {
+            background: #007acc;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-wrapper button:hover {
+            background: #005b99;
+        }
+
+        .login-wrapper a {
+            text-decoration: none;
+            color: #007acc;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                gap: 10px;
+            }
+
+            .input-group {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 20px;
+            }
+
+            .login-wrapper h2 {
+                font-size: 1.5rem;
+            }
+
+            .login-wrapper img {
+                width: 60px;
+            }
+
+            .login-wrapper input,
+            .login-wrapper select {
+                padding: 10px 10px 10px 35px;
+            }
+
+            .login-wrapper button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-interactive">
+        <!-- Bolhas para efeito interativo -->
+        <div class="bubble" style="width: 60px; height: 60px; left: 10%; animation-duration: 12s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; left: 40%; animation-duration: 15s;"></div>
+        <div class="bubble" style="width: 80px; height: 80px; left: 70%; animation-duration: 18s;"></div>
+        <div class="bubble" style="width: 120px; height: 120px; left: 90%; animation-duration: 20s;"></div>
+    </div>
+
+    <div class="login-wrapper">
+        <img src="https://img.icons8.com/cotton/64/tooth.png" alt="Odonto Ferreira">
+        <% if (typeof ExameAlteracao == 'undefined') { %>
+        <h2>Cadastrar Exame - Odonto Ferreira</h2>
+        <form id="formulario">
+            <div style="color: red" id="msgErro"></div>
+            <div class="form-row">
+                <!-- Campo de Id do Paciente -->
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <select id="InputPaciente" required>
+                        <option value="0">Selecione o Paciente</option>
+                        <% for (let i = 0; i < exames.length; i++) { %>
+                            <option value="<%= exames[i].id %>"><%= exames[i].nome %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-stethoscope"></i>
+                    <input type="text" id="Inputnome" placeholder="Nome do Exame" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-info-circle"></i>
+                    <input type="text" id="Inputdescricao" placeholder="Descrição" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="Inputdata" placeholder="Data" onblur="validarDataConsulta(this)" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-id-badge"></i>
+                    <select id="Inputcro" required>
+                        <option value="0">Selecione o Dentista</option>
+                        <% for (let i = 0; i < medicos.length; i++) { %>
+                            <option value="<%= medicos[i].cro %>"><%= medicos[i].nome %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <input type="text" id="Inputcusto" placeholder="Custo" maxlength="9" oninput="mascaraCusto(this)" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-clock"></i>
+                    <input type="time" id="Inputhorario" placeholder="Horário" onblur="validarHorario(this)" required>
+                </div>
+            </div>
+            <button type="button" class="btnConfirmar">Cadastrar</button>
+        </form>
+        <% } else { %>
+            <h2>Atualizar Exame - Odonto Ferreira</h2>
+        <form id="formularioAlteracao">
+            <div style="color: red" id="msgErro"></div>
+            <input type="hidden" id="InputId" value="<%= ExameAlteracao.id_ex %>"/>
+            <div class="form-row">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <select id="InputPaciente" required>
+                        <% for (let i = 0; i < paciente.length; i++) { %>
+                            <% if (paciente[i].id == ExameAlteracao.idPac) { %>
+                            <option selected value="<%= paciente[i].id %>"><%= paciente[i].nome %></option>
+                            <%} else { %>
+                                <option value="<%=paciente[i].id%>"><%= paciente[i].nome %></option>
+                            <%} %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-stethoscope"></i>
+                    <input type="text" id="Inputnome" placeholder="Nome do Exame" value="<%= ExameAlteracao.nome || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-info-circle"></i>
+                    <input type="text" id="Inputdescricao" placeholder="Descrição" value="<%= ExameAlteracao.descricao || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="Inputdata" placeholder="Data" onblur="validarDataConsulta(this)" value="<%= ExameAlteracao.data || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-id-badge"></i>
+                    <select id="Inputcro" required>
+                        <% for (let i = 0; i < medico.length; i++) { %>
+                            <% if (medico[i].cro == ExameAlteracao.cro) { %>
+                            <option selected value="<%= medico[i].cro %>"><%= medico[i].nome %></option>
+                            <%} else { %>
+                                <option value="<%=medico[i].cro%>"><%= medico[i].nome %></option>
+                            <%} %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <input type="text" id="Inputcusto" placeholder="Custo" maxlength="9" oninput="mascaraCusto(this)" value="<%= ExameAlteracao.custo || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-clock"></i>
+                    <input type="time" id="Inputhorario" placeholder="Horário" onblur="validarHorario(this)" value="<%= ExameAlteracao.horario || '' %>" required>
+                </div>
+            </div>
+            <button type="button" data-alteracao="true" class="btnConfirmar">Atualizar</button>
+        </form>
+        <%} %>
+    </div>
+</body>
+</html>

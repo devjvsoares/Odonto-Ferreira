@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/RH/cadastroPonto.js"></script>
+    <title>Registro de Ponto</title>
+    <script>
+        function preencherNomeFuncionario(select) {
+        const nomeSelecionado = select.options[select.selectedIndex].getAttribute('data-nome');
+        const inputNome = document.getElementById('InputNome');
+        inputNome.value = nomeSelecionado || ''; 
+        document.getElementById("InputNome").disabled = true;
+        document.getElementById("InputNome").style.backgroundColor = "#f0f0f0";
+    }
+
+    function validarData(campo) {
+        const dataInserida = new Date(campo.value);
+        const hoje = new Date();
+        const inicioDoAno = new Date('2024-01-01');
+
+        hoje.setHours(0, 0, 0, 0);
+        inicioDoAno.setHours(0, 0, 0, 0);
+
+
+        if (dataInserida < inicioDoAno || dataInserida > hoje) {
+            alert("A data deve ser entre 01/01/2024 e amanhã.");
+            campo.value = "";
+        }
+    }
+
+        function alternarSelecao(tipo) {
+            const filtroFuncionario = document.getElementById('filtroFuncionario');
+            const filtroMedico = document.getElementById('filtroMedico');
+
+            if (tipo === 'funcionario') {
+                filtroFuncionario.style.display = 'block';
+                filtroMedico.style.display = 'none';
+            } else if (tipo === 'medico') {
+                filtroFuncionario.style.display = 'none';
+                filtroMedico.style.display = 'block';
+            }
+
+            // Limpa o campo de nome ao alternar
+            const inputNome = document.getElementById('InputNome');
+            inputNome.value = '';
+        }
+    </script>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fc;
+            color: #333;
+        }
+
+        
+        .header {
+            background: #0077b6;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .header h1 {
+            text-shadow: 1px 1px 3px #005f8a;
+        }
+
+    
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters select, .filters input {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h2 {
+            color: #005f8a;
+            margin-bottom: 1rem;
+        }
+
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .register-form input,
+        .register-form textarea,
+        .register-form button,
+        .filters button {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .register-form button {
+            background: #0077b6;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .filters button {
+            background: #0077b6;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .register-form button:hover {
+            background: #005f8a;
+        }
+
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <% if(typeof PontoAlteracao=='undefined' ) { %>
+    <header class="header">
+        <h1>Registro de Ponto</h1>
+    </header>
+
+    <main class="main-content">
+    
+        <section class="filters">
+            <!-- Escolha entre Médico e Funcionário -->
+            <div>
+                <label>
+                    <input style="margin-top: 0.5rem;" type="radio" name="tipoPessoa" value="funcionario" onchange="alternarSelecao('funcionario')" checked>
+                    Funcionário
+                </label> <br>
+                <label>
+                    <input type="radio" name="tipoPessoa" value="medico" onchange="alternarSelecao('medico')">
+                    Dentista
+                </label>
+            </div><br>
+        
+            <div id="filtroFuncionario" style="display: block;">
+                <select onchange="preencherNomeFuncionario(this, 'InputNome')" id="funcionarioFilter" name="funcionario">
+                    <option value="0">Selecione o Funcionário</option>
+                    <% for (let i = 0; i < funcionario.length; i++) { %>
+                        <option value="<%= funcionario[i].id %>" data-nome="<%= funcionario[i].nome %>">
+                            <%= funcionario[i].nome %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+            <div id="filtroMedico" style="display: none;">
+                <select onchange="preencherNomeFuncionario(this, 'InputNome')" id="funcionarioFilter" name="medico">
+                    <option value="0">Selecione o Médico</option>
+                    <% for (let i = 0; i < medico.length; i++) { %>
+                        <option value="<%= medico[i].cro %>" data-nome="<%= medico[i].nome %>">
+                            <%= medico[i].nome %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+        </section>
+        
+
+        <section class="form-section">
+            <div style="color: red" id="msgErro"></div>
+            <h2>Registrar Ponto</h2>
+            <form class="register-form">
+                <input type="text" name="nome" id="InputNome" placeholder="Nome do Funcionário" required>
+                <h5 style="margin-bottom: -0.5rem;">Data do Ponto:</h5>
+                <input type="date" name="data" id="InputData" placeholder="Data" onblur="validarData(this)" required>
+                <h5 style="margin-bottom: -0.5rem;">Horário de Entrada:</h5>
+                <input type="time" id="InputHoraEntrada" name="horaEntrada" placeholder="Formato (HH:MM)" required>
+                <h5 style="margin-bottom: -0.5rem;">Horário de Saída para Almoço:</h5>
+                <input type="time" id="InputHoraSaidaAlmoco" name="horaSaidaAlmoco" placeholder="Formato (HH:MM)" required>
+                <h5 style="margin-bottom: -0.5rem;">Horário de Retorno do Almoço:</h5>
+                <input type="time" id="InputHoraRetornoAlmoco" name="horaRetornoAlmoco" placeholder="Formato (HH:MM)" required>
+                <h5 style="margin-bottom: -0.5rem;">Horário de Saída:</h5>
+                <input type="time" id="InputHoraSaida" name="horaSaida" placeholder="Formato (HH:MM)" required>
+                <button type="button" class="btnConfirmar">Registrar Ponto</button>
+            </form>
+        </section>
+    </main>
+        <% } else { %>
+            <header class="header">
+                <h1>Alteração de Ponto</h1>
+            </header>
+        <main class="main-content">
+            <section class="form-section">
+                <input type="hidden" id="inputId" value="<%= PontoAlteracao.id %>"/>
+                <div style="color: red" id="msgErro"></div>
+                <h2>Alterar Ponto</h2>
+                <form class="register-form">
+                    <input type="text" name="nome" id="InputNome" placeholder="Nome do Funcionário" value="<%= PontoAlteracao.nome%>" required>
+                    <h5 style="margin-bottom: -0.5rem;">Data do Ponto:</h5>
+                    <input type="date" name="data" id="InputData" value="<%=new Date(PontoAlteracao.data).toISOString().slice(0, 10)%>" placeholder="Data" required>
+                    <h5 style="margin-bottom: -0.5rem;">Horário de Entrada:</h5>
+                    <input type="time" id="InputHoraEntrada" name="horaEntrada" value="<%= PontoAlteracao.horaEntrada%>" placeholder="Formato (HH:MM)" required>
+                    <h5 style="margin-bottom: -0.5rem;">Horário de Saída para Almoço:</h5>
+                    <input type="time" id="InputHoraSaidaAlmoco" name="horaSaidaAlmoco" value="<%= PontoAlteracao.horaSaidaAlmoco%>" placeholder="Formato (HH:MM)" required>
+                    <h5 style="margin-bottom: -0.5rem;">Horário de Retorno do Almoço:</h5>
+                    <input type="time" id="InputHoraRetornoAlmoco" name="horaRetornoAlmoco" value="<%= PontoAlteracao.horaRetornoAlmoco%>" placeholder="Formato (HH:MM)" required>
+                    <h5 style="margin-bottom: -0.5rem;">Horário de Saída:</h5>
+                    <input type="time" id="InputHoraSaida" name="horaSaida" value="<%= PontoAlteracao.horaSaida%>" placeholder="Formato (HH:MM)" required>
+                    <button type="button" data-alteracao="true" class="btnConfirmar">Registrar Ponto</button>
+                </form>
+            </section>
+    <% } %>
+    </main>
+
+</body>
+</html>

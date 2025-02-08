@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="/js/funcionarios/cadastrar.js"></script>
+    <script>
+        function mascaraCPF(campo) {
+        let cpf = campo.value.replace(/\D/g, "");
+        cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+        cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        campo.value = cpf;
+    }
+
+    function validarCPF(campo) {
+        const cpf = campo.value.replace(/\D/g, "");
+
+        if(cpf.length == 0){
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        if (cpf.length !== 11) {
+            alert("CPF inválido. Deve conter 11 dígitos.");
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        if (/^(\d)\1+$/.test(cpf)) {
+            alert("CPF inválido. Os digitos não podem ser iguais!");
+            campo.style.borderColor = "red";
+            return false;
+        }
+        let soma = 0;
+        let resto;
+
+        for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10))) {
+            alert("CPF inválido. Tente novamente!");
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        soma = 0;
+        for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(10, 11))) {
+            alert("CPF inválido.");
+            campo.style.borderColor = "red";
+            return false;
+        }
+        campo.style.borderColor = "";
+        return true;
+    }
+
+
+    function mascaraCEP(campo) {
+            let cep = campo.value.replace(/\D/g, ""); // Remove caracteres não numéricos
+            cep = cep.replace(/^(\d{5})(\d)/, "$1-$2"); // Formato "00000-000"
+            campo.value = cep;
+        }
+
+        async function validarEBuscarCEP(campo) {
+            const cep = campo.value.replace(/\D/g, "");
+
+
+            if(cep.length == 0){
+                campo.style.borderColor = "red";
+                return false;
+            }
+            const regex = /^[0-9]{8}$/;
+
+            if (!regex.test(cep)) {
+                alert("CEP inválido. Insira no formato 00000-000.");
+                campo.style.borderColor = "red";
+                
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+
+                if (data.erro) {
+                    alert("CEP não encontrado.");
+                    campo.style.borderColor = "red";
+                    limparCamposEndereco();
+                } else {
+                    preencherCamposEndereco(data);
+                    campo.style.borderColor = "";
+                }
+            } catch (error) {
+                alert("Erro ao consultar o CEP. Verifique sua conexão ou tente novamente.");
+                console.error(error);
+            }
+        }
+
+        function preencherCamposEndereco(data) {
+            document.getElementById("InputEndereco").value = data.logradouro || "";
+            document.getElementById("InputBairro").value = data.bairro || "";
+        }
+
+        // Função para limpar os campos de endereço
+        function limparCamposEndereco() {
+            document.getElementById("InputEndereco").value = "";
+            document.getElementById("InputBairro").value = "";
+        }
+
+        function validarEmail(campo) {
+            const email = campo.value.trim();
+
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (email === ""){
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (!regex.test(email)) {
+                alert("Email inválido. Por favor, insira um email válido.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+            
+
+            campo.style.borderColor = "";
+            return true;
+        }
+
+        function validarDataAdmissao(campo) {
+            const dataInserida = new Date(campo.value);
+            const dataAtual = new Date();
+            const dataLimiteInferior = new Date('1990-01-01');
+
+            dataAtual.setHours(0, 0, 0, 0);
+            dataLimiteInferior.setHours(0, 0, 0, 0);
+
+            if (dataInserida === ""){
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida > dataAtual) {
+                alert("A data não pode ser futura. Por favor, selecione uma data anterior ou igual a hoje.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida < dataLimiteInferior) {
+                alert("A data não pode ser anterior a 01/01/1990.");
+                campo.style.borderColor = "red";
+                return false;
+            } 
+
+            campo.style.borderColor = ""; 
+            return true;
+        }
+
+        function validarDataNascimento(campo) {
+            const dataInserida = new Date(campo.value); 
+            const hoje = new Date(); 
+            const umAnoAtras = new Date();
+            const centoDezAnosAtras = new Date();
+
+            umAnoAtras.setFullYear(hoje.getFullYear() - 1);
+            centoDezAnosAtras.setFullYear(hoje.getFullYear() - 110);
+
+            if (dataInserida === ""){
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida > umAnoAtras) {
+                alert("A data de nascimento não pode ser inferior a 1 ano de idade.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida < centoDezAnosAtras) {
+                alert("A data de nascimento não pode exceder 110 anos.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            campo.style.borderColor = ""; 
+            return true;
+        }
+    </script>
+
+    <title>Cadastrar Funcionários - Odonto Ferreira</title>
+    <style>
+         * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            overflow: auto;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Começar do topo */
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+        }
+
+        .background-interactive {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            bottom: -100px;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+
+            50% {
+                transform: translateY(-300px) translateX(50px);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .login-wrapper h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .login-wrapper img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1 1 calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+
+        .login-wrapper input,
+        .login-wrapper select {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .login-wrapper button {
+            background: #007acc;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-wrapper button:hover {
+            background: #005b99;
+        }
+
+        .login-wrapper a {
+            text-decoration: none;
+            color: #007acc;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                gap: 10px;
+            }
+
+            .input-group {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 20px;
+            }
+
+            .login-wrapper h2 {
+                font-size: 1.5rem;
+            }
+
+            .login-wrapper img {
+                width: 60px;
+            }
+
+            .login-wrapper input,
+            .login-wrapper select {
+                padding: 10px 10px 10px 35px;
+            }
+
+            .login-wrapper button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-interactive">
+        <!-- Bolhas para efeito interativo -->
+        <div class="bubble" style="width: 60px; height: 60px; left: 10%; animation-duration: 12s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; left: 40%; animation-duration: 15s;"></div>
+        <div class="bubble" style="width: 80px; height: 80px; left: 70%; animation-duration: 18s;"></div>
+        <div class="bubble" style="width: 120px; height: 120px; left: 90%; animation-duration: 20s;"></div>
+    </div>
+
+    <div class="login-wrapper">
+        <img src="https://img.icons8.com/cotton/64/tooth.png" alt="Odonto Ferreira">
+        <% if (typeof FuncionarioAlteracao == 'undefined') { %>
+            <h2>Cadastrar Funcionário - Odonto Ferreira</h2>
+            <form id="formulario">
+                <div style="color: red" id="msgErro"></div>
+                <div class="form-row" >
+                    <div class="input-group" >
+                        <i class="fas fa-user" ></i>
+                        <input type="text" id="InputNome" placeholder="Nome Completo" required>
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom: -5rem;">
+                        <a style="color: black;" >Data de Admissão</a>
+                        <i   class="fas fa-calendar-plus" style="margin-top: -1.5rem;"></i>
+                        <input type="date" id="InputData_adm" placeholder="Data de Admissão" onblur="validarDataAdmissao(this)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope" style="margin-top: -0.8rem;"></i>
+                        <input type="email" id="InputEmail" placeholder="Email" onblur="validarEmail(this)" required>
+                    </div>
+                    <div class="input-group">
+                        <a style="color: black;">Data de Nascimento</a>
+                        <i class="fas fa-calendar-alt" style="margin-top: 0.8rem;"></i>
+                        <input type="date" id="InputNascimento" onblur="validarDataNascimento(this)" placeholder="Data de Nascimento" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fas fa-map-pin"></i>
+                        <input type="text" id="InputCep" oninput="mascaraCEP(this)" onblur="validarEBuscarCEP(this)" maxlength="9" placeholder="CEP" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="InputEndereco" placeholder="Endereço" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-city"></i>
+                        <input type="text" id="InputBairro" placeholder="Bairro" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="InputCpf" maxlength="14" oninput="mascaraCPF(this)" onblur="validarCPF(this)" placeholder="CPF" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-briefcase"></i>
+                        <select id="InputCargo" required>
+                            <option value="0">Selecione o Cargo</option>
+                            <% for (let i = 0; i < cargo.length; i++) { %>
+                                <option value="<%= cargo[i].id %>"><%= cargo[i].nome %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="btnConfirmar">Cadastrar</button>
+            </form>
+        <% } else { %>
+            <h2>Alterar Funcionário - Odonto Ferreira</h2>
+            <form id="formularioAlteracao">
+                <div style="color: red" id="msgErro"></div>
+                <input type="hidden" id="inputId" value="<%= FuncionarioAlteracao.id %>"/>
+                <div class="form-row">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="InputNome" placeholder="Nome Completo" value="<%= FuncionarioAlteracao.nome || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-calendar-plus"></i>
+                        <input type="date" id="InputData_adm" onblur="validarDataAdmissao(this)" placeholder="Data de Admissão" value="<%= FuncionarioAlteracao.data_adm ? new Date(FuncionarioAlteracao.data_adm).toISOString().split('T')[0] : '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="InputEmail" onblur="validarEmail(this)" placeholder="Email" value="<%= FuncionarioAlteracao.email || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" id="InputNascimento" onblur="validarDataNascimento(this)" placeholder="Data de Nascimento" value="<%= FuncionarioAlteracao.nascimento ? new Date(FuncionarioAlteracao.nascimento).toISOString().split('T')[0] : '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-pin"></i>
+                        <input type="text" id="InputCep" placeholder="CEP" oninput="mascaraCEP(this)" onblur="validarEBuscarCEP(this)" maxlength="9" value="<%= FuncionarioAlteracao.cep || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="InputEndereco" placeholder="Endereço" value="<%= FuncionarioAlteracao.endereco || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-city"></i>
+                        <input type="text" id="InputBairro" placeholder="Bairro" value="<%= FuncionarioAlteracao.bairro || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="InputCpf" placeholder="CPF" onblur="validarCPF(this)" oninput="mascaraCPF(this)" value="<%= FuncionarioAlteracao.cpf || '' %>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-user-tie" style="padding-bottom: 2rem;"></i>
+                        <select id="InputCargo" style="margin-bottom: 2rem;" required>
+                        
+                            <% for (let i = 0; i < cargo.length; i++) { %>
+                                <% if (cargo[i].nome == FuncionarioAlteracao.cargo) { %>
+                                <option selected value="<%= cargo[i].id %>"><%= cargo[i].nome %></option>
+                                <%} else { %>
+                                    <option value="<%=cargo[i].id%>"><%= cargo[i].nome %></option>
+                                <%} %>
+                            <% } %>
+                        </select>  
+                    </div>                                 
+                </div>
+                <button type="button" data-alteracao="true" class="btnConfirmar" >Alterar</button>
+            </form>
+        <% } %>
+    </div>
+</body>
+
+</html>

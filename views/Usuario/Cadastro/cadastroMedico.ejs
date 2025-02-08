@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<script src="/js/medicos/cadastrar.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        function validarEmail(campo) {
+            const email = campo.value.trim();
+
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (email === ""){
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (!regex.test(email)) {
+                alert("Email inválido. Por favor, insira um email válido.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+            
+
+            campo.style.borderColor = "";
+            return true;
+        }
+
+        function validarDataNascimento(campo) {
+            const dataInserida = new Date(campo.value); 
+            const hoje = new Date(); 
+            const umAnoAtras = new Date();
+            const centoDezAnosAtras = new Date();
+
+            umAnoAtras.setFullYear(hoje.getFullYear() - 1);
+            centoDezAnosAtras.setFullYear(hoje.getFullYear() - 110);
+
+            if (dataInserida === ""){
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida > umAnoAtras) {
+                alert("A data de nascimento não pode ser inferior a 1 ano de idade.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            if (dataInserida < centoDezAnosAtras) {
+                alert("A data de nascimento não pode exceder 110 anos.");
+                campo.style.borderColor = "red";
+                return false;
+            }
+
+            campo.style.borderColor = ""; 
+            return true;
+        }
+
+    function mascaraCPF(campo) {
+        let cpf = campo.value.replace(/\D/g, "");
+        cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+        cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        campo.value = cpf;
+    }
+
+    function validarCPF(campo) {
+        const cpf = campo.value.replace(/\D/g, "");
+
+        if(cpf.length == 0){
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        if (cpf.length !== 11) {
+            alert("CPF inválido. Deve conter 11 dígitos.");
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        if (/^(\d)\1+$/.test(cpf)) {
+            alert("CPF inválido. Os digitos não podem ser iguais!");
+            campo.style.borderColor = "red";
+            return false;
+        }
+        let soma = 0;
+        let resto;
+
+        for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10))) {
+            alert("CPF inválido. Tente novamente!");
+            campo.style.borderColor = "red";
+            return false;
+        }
+
+        soma = 0;
+        for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(10, 11))) {
+            alert("CPF inválido.");
+            campo.style.borderColor = "red";
+            return false;
+        }
+        campo.style.borderColor = "";
+        return true;
+    }
+    function validarNumero(campo){
+        let numero = campo.value;
+        if(numero.lenght != 0){
+            campo.style.borderColor = "";
+            return true;
+        }
+        else{
+            campo.style.borderColor = "red";
+            return false;
+        }
+    }
+
+    function mascaraCEP(campo) {
+            let cep = campo.value.replace(/\D/g, ""); // Remove caracteres não numéricos
+            cep = cep.replace(/^(\d{5})(\d)/, "$1-$2"); // Formato "00000-000"
+            campo.value = cep;
+        }
+
+        async function validarEBuscarCEP(campo) {
+            const cep = campo.value.replace(/\D/g, "");
+
+
+            if(cep.length == 0){
+                campo.style.borderColor = "red";
+                return false;
+            }
+            const regex = /^[0-9]{8}$/;
+
+            if (!regex.test(cep)) {
+                alert("CEP inválido. Insira no formato 00000-000.");
+                campo.style.borderColor = "red";
+                
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+
+                if (data.erro) {
+                    alert("CEP não encontrado.");
+                    campo.style.borderColor = "red";
+                    limparCamposEndereco();
+                    document.getElementById("Inputendereco").disabled = false;
+                    
+                } else {
+                    preencherCamposEndereco(data);
+                    campo.style.borderColor = "";
+                    document.getElementById("Inputendereco").disabled = true;
+                    document.getElementById("Inputendereco").style.backgroundColor = "#f0f0f0";
+                    document.getElementById("Inputbairro").disabled = true;
+                    document.getElementById("Inputbairro").style.backgroundColor = "#f0f0f0";
+                    document.getElementById("Inputcidade").disabled = true;
+                    document.getElementById("Inputcidade").style.backgroundColor = "#f0f0f0";
+                    document.getElementById("Inputestado").disabled = true;
+                    document.getElementById("Inputestado").style.backgroundColor = "#f0f0f0";
+                }
+            } catch (error) {
+                alert("Erro ao consultar o CEP. Verifique sua conexão ou tente novamente.");
+                console.error(error);
+            }
+        }
+
+        function preencherCamposEndereco(data) {
+            document.getElementById("Inputendereco").value = data.logradouro || "";
+            document.getElementById("Inputbairro").value = data.bairro || "";
+            document.getElementById("Inputcidade").value = data.localidade || "";
+            document.getElementById("Inputestado").value = data.estado || "";
+        }
+
+        function limparCamposEndereco() {
+            document.getElementById("Inputendereco").value = "";
+            document.getElementById("Inputbairro").value =  "";
+            document.getElementById("Inputcidade").value = "";
+            document.getElementById("Inputestado").value = "";
+        }
+
+        function validarEndereco(campo){
+        let endereco = campo.value;
+        if(endereco === 0 || endereco === ""){
+            campo.style.borderColor = "red";
+            return false;
+        }
+        else{
+            campo.style.borderColor = "";
+            return true;
+        }
+    }
+
+    function validarSenha(senha) {
+        const regex = /^(?=.*[a-zA-Z])(?=.*\d).{6,}$/;
+
+        if (regex.test(senha.value)) {
+            senha.style.borderColor = "";
+            return true;
+        } else {
+            alert("A senha deve ter:\n - No minímo 6 caracteres\n - Letras e números")
+            senha.style.borderColor = "red";
+            return false;
+        }
+    }
+
+    function validarConfirmacaoSenha() {
+        const senha = document.getElementById("Inputsenha").value.trim();
+        const confirmaSenha = document.getElementById("InputConfirmaSenha").value.trim();
+
+        if (confirmaSenha == senha) {
+            document.getElementById("InputConfirmaSenha").style.borderColor = "";
+            return true;
+        } else {
+            alert("As senhas não se coincidem!");
+            document.getElementById("InputConfirmaSenha").style.borderColor = "red";
+            return false;
+        }
+    }
+
+
+    </script>
+    
+    <title>Cadastrar Dentista - Odonto Ferreira</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            overflow: auto;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Começar do topo */
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+        }
+
+        .background-interactive {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            bottom: -100px;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+
+            50% {
+                transform: translateY(-300px) translateX(50px);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .login-wrapper h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .login-wrapper img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1 1 calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+
+        .login-wrapper input,
+        .login-wrapper select {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .login-wrapper button {
+            background: #007acc;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-wrapper button:hover {
+            background: #005b99;
+        }
+
+        .login-wrapper a {
+            text-decoration: none;
+            color: #007acc;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                gap: 10px;
+            }
+
+            .input-group {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 20px;
+            }
+
+            .login-wrapper h2 {
+                font-size: 1.5rem;
+            }
+
+            .login-wrapper img {
+                width: 60px;
+            }
+
+            .login-wrapper input,
+            .login-wrapper select {
+                padding: 10px 10px 10px 35px;
+            }
+
+            .login-wrapper button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-interactive">
+        <!-- Bolhas para efeito interativo -->
+        <div class="bubble" style="width: 60px; height: 60px; left: 10%; animation-duration: 12s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; left: 40%; animation-duration: 15s;"></div>
+        <div class="bubble" style="width: 80px; height: 80px; left: 70%; animation-duration: 18s;"></div>
+        <div class="bubble" style="width: 120px; height: 120px; left: 90%; animation-duration: 20s;"></div>
+    </div>
+
+        <div class="login-wrapper">
+        <img src="https://img.icons8.com/cotton/64/tooth.png" alt="Odonto Ferreira">
+        <% if(typeof MedicoAlteracao=='undefined' ) { %>
+            <h2>Cadastrar Médico - Odonto Ferreira</h2>
+            <form id="formulario">
+                <div style="color: red" id="msgErro"></div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <i class="fas fa-id-badge"></i>
+                        <input type="number" id="Inputcro" maxlength="10" placeholder="CRO" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="Inputnome" placeholder="Nome completo" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-venus-mars"></i>
+                        <select required id="Inputsexo">
+                            <option value="">Sexo</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="feminino">Feminino</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="Inputemail" placeholder="Email" onblur="validarEmail(this)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-building"></i>
+                        <input type="text" id="Inputespecialidade" placeholder="Especialidade" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" id="Inputnascimento" placeholder="Data de Nascimento" onblur="validarDataNascimento(this)" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="Inputcpf" oninput="mascaraCPF(this)" onblur="validarCPF(this)" placeholder="CPF" maxlength="14" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-pin"></i>
+                        <input type="text" id="Inputcep" oninput="mascaraCEP(this)" onblur="validarEBuscarCEP(this)" placeholder="CEP" maxlength="9" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="Inputendereco" onblur="validarEndereco(this)" placeholder="Endereço" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="Inputnumero" onblur="validarNumero(this)" placeholder="Numero da Casa/Apartamento" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="Inputbairro" onblur="validarEndereco(this)" placeholder="Bairro" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="Inputestado" onblur="validarEndereco(this)" placeholder="Estado" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="Inputcidade" onblur="validarEndereco(this)" placeholder="Cidade" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-venus-mars"></i>
+                        <select required id="Inputativo">
+                            <option value="0">Bloqueado</option>
+                            <option value="1">Ativo</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="Inputsenha" onblur="validarSenha(this)" placeholder="Senha" required>
+                    </div>
+                    <br>
+                    <div class="input-group" style="margin-top: -1rem;">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="InputConfirmaSenha" placeholder="Confirme sua senha" onblur="validarConfirmacaoSenha()" required>
+                    </div>
+                </div>
+                <button type="button" class="btnConfirmar">Cadastrar</button>
+            </form>
+            <% } else { %>
+                <h2>Alterar Dentista - Odonto Ferreira</h2>
+                <form id="formularioAlteracao">
+                    <div style="color: red" id="msgErroAlteracao"></div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="text" id="Inputcro" placeholder="CRO" value="<%= MedicoAlteracao.cro || '' %>"  required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="Inputnome" placeholder="Nome completo" value="<%= MedicoAlteracao.nome || '' %>" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-venus-mars"></i>
+                            <select required id="Inputsexo">
+                                <option value="">
+                                    <%= MedicoAlteracao.sexo %>
+                                </option>
+                                <option value="Masculino" <%=MedicoAlteracao.sexo==='Masculino' ? 'selected' : '' %>
+                                    >Masculino</option>
+                                <option value="Feminino" <%=MedicoAlteracao.sexo==='Feminino' ? 'selected' : '' %>
+                                    >Feminino</option>
+                                <option value="Outro" <%=MedicoAlteracao.sexo==='Outro' ? 'selected' : '' %>>Outro
+                                </option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="Inputemail" placeholder="Email" value="<%= MedicoAlteracao.email || '' %>" onblur="validarEmail(this)" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-building"></i>
+                            <input type="text" id="Inputespecialidade" placeholder="Especialidade" value="<%= MedicoAlteracao.especialidade || '' %>"  required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-calendar-alt"></i>
+                            <input type="date" id="Inputnascimento" placeholder="Data de Nascimento" value="<%= MedicoAlteracao.nascimento ? new Date(MedicoAlteracao.nascimento).toISOString().split('T')[0] : '' %>" onblur="validarDataNascimento(this)" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="Inputcpf" oninput="mascaraCPF" onblur="validarCPF" placeholder="CPF" value="<%= MedicoAlteracao.cpf %>" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-pin"></i>
+                            <input type="text" id="Inputcep" oninput="mascaraCEP(this)" onblur="validarEBuscarCEP(this)" value="<%= MedicoAlteracao.cep || '' %>" placeholder="CEP" maxlength="9" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="Inputendereco" value="<%= MedicoAlteracao.endereco || '' %>" onblur="validarEndereco(this)" placeholder="Endereço" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="Inputnumero"  onblur="validarNumero(this)" placeholder="Numero da Casa/Apartamento" value="<%= MedicoAlteracao.numero || '' %>" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="Inputbairro"  onblur="validarEndereco(this)" placeholder="Bairro" value="<%= MedicoAlteracao.bairro || '' %>" required>
+                        </div>
+    
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="Inputestado"  onblur="validarEndereco(this)" placeholder="Estado" value="<%= MedicoAlteracao.estado || '' %>" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" id="Inputcidade" value="<%= MedicoAlteracao.cidade || '' %>" onblur="validarEndereco(this)" placeholder="Cidade" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-venus-mars"></i>
+                            <select required id="Inputativo">
+                                <option value="0" <%=MedicoAlteracao.ativo==='0' ? 'selected' : '' %>
+                                    >Bloqueado</option>
+                                <option value="Feminino" <%=MedicoAlteracao.ativo==='1' ? 'selected' : '' %>
+                                    >Ativo</option>
+                            </select>
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="text" id="Inputsenha" value="<%= MedicoAlteracao.senha || '' %>" onblur="validarSenha(this)" placeholder="Senha" required>
+                        </div>
+                        <br>
+                        <div class="input-group" style="margin-top: -1rem;">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="InputConfirmaSenha" placeholder="Confirme sua senha" value="<%= MedicoAlteracao.senha || '' %>" onblur="validarConfirmacaoSenha()" required>
+                        </div>
+                    <button type="button" data-alteracao="true" class="btnConfirmar">Alterar</button>
+                </form>
+            <% } %>
+            
+    </div>
+    </div>
+</body>
+
+</html>

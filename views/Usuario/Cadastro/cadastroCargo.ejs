@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="/js/cargos/cadastrar.js"></script>
+    <script>
+        function mascaraSalario(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            let intValue = parseInt(value, 10) || 0; 
+            let formattedValue = (intValue / 100).toFixed(2); 
+
+            // Adiciona o ponto a cada 3 casas para a parte inteira
+            let parts = formattedValue.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            // Atualiza o campo com o valor formatado
+            input.value = parts.join(',');
+        }
+
+    </script>
+    <title>Cadastrar Cargo - Odonto Ferreira</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            overflow: auto;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+        }
+
+        .background-interactive {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            bottom: -100px;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+
+            50% {
+                transform: translateY(-300px) translateX(50px);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .login-wrapper h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .login-wrapper img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1 1 calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+
+        .login-wrapper input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .login-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .login-wrapper button {
+            background: #007acc;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-wrapper button:hover {
+            background: #005b99;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                gap: 10px;
+            }
+
+            .input-group {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-interactive">
+        <!-- Bolhas para efeito interativo -->
+        <div class="bubble" style="width: 60px; height: 60px; left: 10%; animation-duration: 12s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; left: 40%; animation-duration: 15s;"></div>
+        <div class="bubble" style="width: 80px; height: 80px; left: 70%; animation-duration: 18s;"></div>
+        <div class="bubble" style="width: 120px; height: 120px; left: 90%; animation-duration: 20s;"></div>
+    </div>
+
+    <div class="login-wrapper">
+        <img src="https://img.icons8.com/cotton/64/tooth.png" alt="Odonto Ferreira">
+        <% if (typeof CargoAlteracao == 'undefined') { %>
+        <h2>Cadastrar Cargo - Odonto Ferreira</h2>
+        <form id="formulario">
+            <div style="color: red" id="msgErro"></div>
+            <div class="form-row">
+                <div class="input-group">
+                    <i class="fas fa-briefcase"></i>
+                    <input type="text" id="InputNomeCargo" placeholder="Nome do Cargo" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="text" id="InputSalario" oninput="mascaraSalario(this)" maxlength="10" placeholder="Salário" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-clock"></i>
+                    <input type="number" id="InputCargaHoraria" placeholder="Carga Horária Semanal (Horas)" required>
+                </div>
+            </div>
+            <button type="button" class="btnConfirmar">Cadastrar</button>
+        </form>
+        <% } else { %>
+            <h2>Cadastrar Cargo - Odonto Ferreira</h2>
+        <form id="formulario">
+            <div style="color: red" id="msgErro"></div>
+            <input type="hidden" id="InputId" value="<%= CargoAlteracao.id %>"/>
+            <div class="form-row">
+                <div class="input-group">
+                    <i class="fas fa-briefcase"></i>
+                    <input type="text" id="InputNomeCargo" placeholder="Nome do Cargo" value="<%= CargoAlteracao.nome || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="text" id="InputSalario" placeholder="Salário" oninput="mascaraSalario(this)" value="<%= CargoAlteracao.salario || '' %>" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-clock"></i>
+                    <input type="number" id="InputCargaHoraria" placeholder="Carga Horária Semanal (Horas)" value="<%= CargoAlteracao.carga_horaria || '' %>"required>
+                </div>
+            </div>
+            <button type="button" data-alteracao="true" class="btnConfirmar">Cadastrar</button>
+        </form>
+        <% } %>
+    </div>
+</body>
+</html>
