@@ -54,7 +54,7 @@ Bem-vindo ao repositório do **Odonto Ferreira**, um sistema web desenvolvido pa
 ## 💌 Contribuição
 Aqui estão listados as pessoas que colaboraram no projeto:
 - [Bruno Cavalheiro](https://github.com/BnoCavalheiro)
-- Felipe Meneghetti
+- [Felipe Meneghetti](https://github.com/felipemeneb24)
 
 ## 🌐 Licença
 Este site foi criado em supervisão dos professores Fúlvio e Renato na Universidade do Oeste Paulista.
